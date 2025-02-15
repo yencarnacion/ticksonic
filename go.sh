@@ -9,4 +9,4 @@ fi
 ticker=$1
 
 # Run the command with the provided ticker and the fixed parameters.
-poetry run python ticksonic.py "$ticker" 10000 100000
+poetry run python ticksonic-databento.py "$ticker" 10000 100000
