@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(message)s')
 # Environment settings
 API_KEY = os.getenv('DATABENTO_API_KEY', 'YOUR_API_KEY_HERE')
 DEFAULT_THRESHOLD = 90000
-DATASET = "XNAS.ITCH"  # Nasdaq TotalView-ITCH
+DATASET = "EQUS.MINI"  # Nasdaq TotalView-ITCH
 
 # Path to sound files
 BUY_SOUND_PATH = os.getenv('BUY_SOUND_PATH', 'sounds/buy.wav')
@@ -208,6 +208,7 @@ class TradesProcessor:
                 current_ts = getattr(record, "ts_event", None)
                 if prev_ts is not None and current_ts is not None:
                     sleep_time = (current_ts - prev_ts) / 1e9
+                    sleep_time = max(0, sleep_time)
                     time.sleep(sleep_time)
                 self.handle_record(record)
                 prev_ts = current_ts
