@@ -255,6 +255,11 @@ class TradesProcessor:
             price = convert_price(raw_price)
             volume = raw_volume
             amount = price * volume
+
+            # Filter out trades below the threshold
+            if amount < self.trade_threshold:
+                return            
+
             timestamp_str = self.convert_timestamp(ts)
             
             with self._lock:
