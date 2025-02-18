@@ -25,7 +25,8 @@ except Exception as e:
     logging.error(f"Could not initialize pygame mixer: {e}")
     sys.exit(1)
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.getLogger('databento').setLevel(logging.WARNING)
 
 # Environment settings
 API_KEY = os.getenv('DATABENTO_API_KEY', 'YOUR_API_KEY_HERE')
