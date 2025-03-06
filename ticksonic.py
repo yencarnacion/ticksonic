@@ -18,12 +18,19 @@ from dotenv import load_dotenv
 # Load .env file if it exists, without overriding existing environment variables
 load_dotenv()
 
-# Initialize Pygame mixer (do this once at the start, wrap in try/except for safety)
-try:
-    pygame.mixer.init()
-except Exception as e:
-    logging.error(f"Could not initialize pygame mixer: {e}")
-    sys.exit(1)
+# --- Check for the --silent flag ---
+silent = False
+if '--silent' in sys.argv:
+    silent = True
+    sys.argv.remove('--silent')
+
+# Initialize Pygame mixer (only if not silent)
+if not silent:
+    try:
+        pygame.mixer.init()
+    except Exception as e:
+        logging.error(f"Could not initialize pygame mixer: {e}")
+        sys.exit(1)
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(message)s')
@@ -70,7 +77,6 @@ def format_amount(amount: float) -> str:
     else:
         # Regular numeric format with commas and 2 decimals
         return f"{amount:,.2f}"
-
 
 class AudioManager:
     def __init__(self):
@@ -196,13 +202,28 @@ class AudioManager:
         if self.below_bid_sound_big is not None:
             self.below_bid_sound_big.play()
 
+# Define a silent version of AudioManager whose methods do nothing.
+class SilentAudioManager:
+    def play_above_ask_sound(self): pass
+    def play_above_ask_sound_big(self): pass
+    def play_buy_sound(self): pass
+    def play_buy_sound_big(self): pass
+    def play_between_bid_ask_sound_ask(self): pass
+    def play_between_bid_ask_sound(self): pass
+    def play_between_bid_ask_sound_bid(self): pass
+    def play_sell_sound(self): pass
+    def play_sell_sound_big(self): pass
+    def play_below_bid_sound(self): pass
+    def play_below_bid_sound_big(self): pass
+
 
 class TradesProcessor:
-    def __init__(self, api_key, trade_threshold, big_threshold):
+    def __init__(self, api_key, trade_threshold, big_threshold, silent=False):
         self.api_key = api_key
         self.trade_threshold = trade_threshold
         self.big_threshold = big_threshold        
-        self.audio_manager = AudioManager()
+        # Use SilentAudioManager if silent mode is requested; otherwise use the regular AudioManager.
+        self.audio_manager = SilentAudioManager() if silent else AudioManager()
         self.client = WebSocketClient(api_key=self.api_key)
         self.subscriptions = []
         # Store quotes in an instance dict rather than a global.
@@ -403,7 +424,7 @@ class TradesProcessor:
 def main():
     """
     Usage:
-      python ticksonic.py [ticker] [threshold] [big_threshold]
+      python ticksonic.py [ticker] [threshold] [big_threshold] [--silent]
 
     If no arguments are given, defaults to ticker='TSLA', threshold=90000, and big_threshold=490000.
     Examples:
@@ -411,6 +432,7 @@ def main():
       python script.py TSLA 90000
       python script.py TSLA
       python script.py
+      python script.py --silent
     """
     if len(sys.argv) > 4:
         print("Usage: python script.py [ticker] [threshold] [big_threshold]")
@@ -445,7 +467,7 @@ def main():
             print("Error: big_threshold must be a numeric value.")
             sys.exit(1)
 
-    processor = TradesProcessor(API_KEY, threshold, big_threshold)
+    processor = TradesProcessor(API_KEY, threshold, big_threshold, silent=silent)
     processor.subscribe_to_symbols([ticker])
     processor.run()
 
