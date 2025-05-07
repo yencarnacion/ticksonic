@@ -1,7 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, you can obtain one at http://mozilla.org/MPL/2.0/.
-
 import os
 import sys
 import math
@@ -57,6 +53,13 @@ BIG_THRESHOLD = 490000.0
 
 # Epsilon for float comparisons
 EPSILON = 1e-3
+
+def smart_format(price):
+    # If rounding to 2 decimals preserves the value, show exactly 2 decimals
+    if round(price, 4) == round(price, 2):
+        return f"{price:,.2f}"  # Keep exactly 2 decimals, including .00 or .40
+    else:
+        return f"{price:,.4f}".rstrip('0').rstrip('.')  # Up to 4 decimals, trim trailing zeros
 
 def format_amount(amount: float) -> str:
     """
@@ -244,7 +247,7 @@ class TradesProcessor:
         logging.debug(f"Raw timestamp: {ts}")
         if ts and 1e12 <= ts < 2e13:
             dt_obj = datetime.fromtimestamp(ts / 1e3)
-            return dt_obj.strftime('%Y-%m-%d %H:%M:%S')
+            return dt_obj.strftime('%M:%S')
         else:
             return "Invalid timestamp"
 
@@ -293,11 +296,11 @@ class TradesProcessor:
                 # Print the trade in white
                 self.audio_manager.play_between_bid_ask_sound()
                 formatted_amount = format_amount(amount)
-                price_str = f"{price:,.2f}"
+                price_str = smart_format(price) # f"{price:,.4f}"
                 on_color = 'on_grey' if is_big_trade else None
                 attrs = ['bold'] if is_big_trade else []
                 print(colored(
-                    f"Price: {price_str} | Amount: ${formatted_amount} | Time: {timestamp_str} | Ticker: {ticker}",
+                    f"{price_str} | ${formatted_amount} |{timestamp_str} | {ticker}",
                     color=color,
                     on_color=on_color,
                     attrs=attrs
@@ -361,12 +364,12 @@ class TradesProcessor:
 
             # Format and print
             formatted_amount = format_amount(amount)
-            price_str = f"{price:,.2f}"
+            price_str = smart_format(price) # f"{price:,.4f}"
             on_color = 'on_grey' if is_big_trade else None
             attrs = ['bold'] if is_big_trade else []
 
             print(colored(
-                f"Price: {price_str} | Amount: ${formatted_amount} | Time: {timestamp_str} | Ticker: {ticker}",
+                f"{price_str} | ${formatted_amount} | {timestamp_str} | {ticker}",
                 color=color,
                 on_color=on_color,
                 attrs=attrs
