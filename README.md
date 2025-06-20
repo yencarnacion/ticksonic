@@ -79,6 +79,14 @@ If you *already* ran `poetry install` sometime earlier (and nothing changed in `
    - **Red**: Trade executed **at** the bid  
    - **Magenta**: Trade executed **below** the bid  
 
+3. **Sound Legend**
+
+   - The **cash register sound** is for lifting above the ask (yellow color)
+   - Lifting the ask is "**Buy!**" (Green)
+   - The **beep sound** is for transactions between the bid and the ask (white color)
+   - Hitting the bid is "**Sell!**" (Red)
+   - The **ambulance siren sound**  is for hitting below the bid (magenta color)
+   - **pitch variations** indicate the second threshold in size was hit (e.g., there might be a filter only showing trades above $10K but a special pitch variation if above $100K in size)
 
 ---
 
